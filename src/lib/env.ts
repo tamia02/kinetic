@@ -18,6 +18,8 @@ export const env = createEnv({
     CHATTERBOX_API_URL: z.url(),
     CHATTERBOX_API_KEY: z.string().min(1),
     VAPI_SECRET: z.string().optional(),
+    TWILIO_ACCOUNT_SID: z.string().optional(),
+    TWILIO_AUTH_TOKEN: z.string().optional(),
     BYPASS_SUBSCRIPTION_CHECK: z.coerce.boolean().default(false),
     ADMIN_USER_ID: z.string().optional(),
   },

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AssistantCreateDialog } from "@/features/assistants/components/assistant-create-dialog";
 import { AssistantSettings } from "@/features/assistants/components/assistant-settings";
 

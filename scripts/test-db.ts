@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 
-async function test(host, port, user, password, label) {
+async function test(host: string, port: number, user: string, password: string, label: string) {
   const url = `postgresql://${user}:${encodeURIComponent(password)}@${host}:${port}/postgres?sslmode=require`;
   const client = new Client({
     connectionString: url,
@@ -13,7 +13,7 @@ async function test(host, port, user, password, label) {
     await client.end();
     return true;
   } catch (err) {
-    console.log(`[FAIL] ${label} - ${err.message}`);
+    console.log(`[FAIL] ${label} - ${(err as Error).message}`);
     return false;
   }
 }
