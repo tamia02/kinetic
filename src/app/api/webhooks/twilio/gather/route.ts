@@ -3,6 +3,7 @@ import twilio from "twilio";
 import { chatterbox } from "@/lib/chatterbox-client";
 import { prisma } from "@/lib/db";
 import { emitWebhook } from "@/lib/integrations/webhook-emitter";
+import { executeTool } from "@/lib/integrations/tool-executor";
 
 const { VoiceResponse } = twilio.twiml;
 
@@ -25,11 +26,23 @@ export async function POST(req: NextRequest) {
         language: "en-IN",
       });
     } else {
-      // 1. Process with LLM (to be implemented)
-      // For now, let's just echo back with a slightly intelligent prefix
-      const aiResponse = `You said: ${speechResult}. I'm currently being trained to handle your requests more intelligently.`;
+      // 1. Process with LLM (Simulated for Phase 3)
+      let aiResponse = "";
+      
+      if (speechResult.toLowerCase().includes("weather")) {
+        // Mocking a tool call for weather
+        const { result } = await executeTool({ 
+          name: "getWeather", 
+          type: "WEBHOOK", 
+          config: { url: "https://api.weather.com/mock" } 
+        }, { location: "London" });
+        
+        aiResponse = "I've checked the weather for you. It's currently sunny in London.";
+      } else {
+        aiResponse = `You said: ${speechResult}. How else can I assist you?`;
+      }
 
-      // 2. Optional: Generate audio via Chatterbox and stream it
+      // 2. Generate audio via Chatterbox and stream it
       // For simplicity in Phase 2, we use Twilio's standard <Say>
       response.say({
         voice: "Polly.Aditi",

@@ -33,13 +33,20 @@ export async function POST(req: NextRequest) {
 
     const response = new VoiceResponse();
 
-    // Mocking an assistant interaction for now
+    // 2. Initial Greeting
     response.say({
-      voice: "Polly.Aditi", // Indian English
+      voice: "Polly.Aditi", 
       language: "en-IN",
-    }, "Welcome to Resonance. I am your AI assistant. How can I help you today?");
+    }, "Welcome to Resonance. I am your AI assistant. This call is being recorded for quality assurance.");
 
-    // We can use <Gather> to collect speech and then process it via Resonance
+    // 3. Enable Recording
+    response.record({
+      action: "/api/webhooks/twilio/recording",
+      maxLength: 3600,
+      playBeep: false,
+    });
+
+    // 4. Start Interaction
     response.gather({
       input: ["speech"],
       action: "/api/webhooks/twilio/gather",
@@ -48,7 +55,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Emit event
-    await emitWebhook("default_org", "call.started", { callSid, from, to });
+    await emitWebhook("default_org", "call.started", { callSid, from, to }, { callSid });
 
     return new NextResponse(response.toString(), {
       headers: {

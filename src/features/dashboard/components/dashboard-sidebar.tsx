@@ -35,6 +35,8 @@ import {
   Headphones,
   Bot,
   Plug,
+  Wrench,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { UsageContainer } from "@/features/billing/components/usage-container";
@@ -139,6 +141,16 @@ export function DashboardSidebar() {
       title: "Integrations",
       url: "/integrations",
       icon: Plug,
+    },
+    {
+      title: "Tools",
+      url: "/tools",
+      icon: Wrench,
+    },
+    {
+      title: "Knowledge",
+      url: "/knowledge",
+      icon: BookOpen,
     },
   ];
 
