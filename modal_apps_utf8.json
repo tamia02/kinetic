@@ -1,0 +1,18 @@
+﻿[
+  {
+    "App ID": "ap-nK8QISvaMFuuC8NcJeSRoE",
+    "Description": "claude-orchestrator",
+    "State": "deployed",
+    "Tasks": "0",
+    "Created at": "2026-02-01 22:42:31+05:30",
+    "Stopped at": null
+  },
+  {
+    "App ID": "ap-UJH800XH8uGucM4nNn9sHq",
+    "Description": "chatterbox-tts",
+    "State": "deployed",
+    "Tasks": "0",
+    "Created at": "2026-03-13 21:00:40+05:30",
+    "Stopped at": null
+  }
+]

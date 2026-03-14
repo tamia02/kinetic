@@ -1,0 +1,60 @@
+﻿--- Testing with @Kinetic1402a ---
+[TRY] Direct + postgres (db.wldwzqnwjmdfesxindkh.supabase.co:5432)
+node.exe : (node:23480) 
+Warning: SECURITY WARNING: 
+The SSL modes 'prefer', 
+'require', and 'verify-ca' 
+are treated as aliases for 
+'verify-full'.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: ((no  
+  de:23480) Wa... 'verif   
+ y-full'.:String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+In the next major version 
+(pg-connection-string 
+v3.0.0 and pg v9.0.0), 
+these modes will adopt 
+standard libpq semantics, 
+which have weaker security 
+guarantees.
+
+To prepare for this change:
+- If you want the current 
+behavior, explicitly use 
+'sslmode=verify-full'
+- If you want libpq 
+compatibility now, use 'use
+libpqcompat=true&sslmode=re
+quire'
+
+See https://www.postgresql.
+org/docs/current/libpq-ssl.
+html for libpq SSL mode 
+definitions.
+(Use `node 
+--trace-warnings ...` to 
+show where the warning was 
+created)
+[FAIL] Direct + postgres - self-signed certificate in certificate chain
+[TRY] Pool5432 + prefixed (aws-1-ap-southeast-1.pooler.supabase.com:5432)
+[FAIL] Pool5432 + prefixed - self-signed certificate in certificate chain
+[TRY] Pool6543 + prefixed (aws-1-ap-southeast-1.pooler.supabase.com:6543)
+[FAIL] Pool6543 + prefixed - self-signed certificate in certificate chain
+
+--- Testing with Kinetic1402a (no @) ---
+[TRY] Direct + postgres (db.wldwzqnwjmdfesxindkh.supabase.co:5432)
+[FAIL] Direct + postgres - self-signed certificate in certificate chain
+[TRY] Pool5432 + prefixed (aws-1-ap-southeast-1.pooler.supabase.com:5432)
+[FAIL] Pool5432 + prefixed - self-signed certificate in certificate chain

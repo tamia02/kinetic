@@ -1,0 +1,4 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_VRrc7yp8LDol@ep-mute-king-ad4zgiml-pooler.c-2.us-east-1.aws.neon.tech/neondb"
+}
