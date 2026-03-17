@@ -37,6 +37,7 @@ import {
   Plug,
   Wrench,
   BookOpen,
+  Waves,
 } from "lucide-react";
 import Link from "next/link";
 import { UsageContainer } from "@/features/billing/components/usage-container";

@@ -32,38 +32,26 @@ export const voicesRouter = createTRPCRouter({
         }
         : {};
 
+      const getVoices = async (variant: "SYSTEM" | "CUSTOM", orgId?: string) => {
+        const query = `
+          SELECT id, name, description, category, language, variant, provider
+          FROM "Voice"
+          WHERE variant = $1
+          ${variant === "CUSTOM" ? 'AND "orgId" = $2' : ""}
+          ${input?.query ? 'AND (name ILIKE $3 OR description ILIKE $3)' : ""}
+          ORDER BY ${variant === "SYSTEM" ? "name ASC" : '"createdAt" DESC'}
+        `;
+        const params: any[] = [variant];
+        if (variant === "CUSTOM") params.push(orgId);
+        if (input?.query) params.push(`%${input.query}%`);
+
+        const res = await ctx.db.query(query, params);
+        return res.rows;
+      };
+
       const [custom, system] = await Promise.all([
-        prisma.voice.findMany({
-          where: {
-            variant: "CUSTOM",
-            orgId: ctx.orgId,
-            ...searchFilter,
-          },
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            category: true,
-            language: true,
-            variant: true,
-          },
-        }),
-        prisma.voice.findMany({
-          where: {
-            variant: "SYSTEM",
-            ...searchFilter,
-          },
-          orderBy: { name: "asc" },
-          select: {
-            id: true,
-            name: true,
-            description: true,
-            category: true,
-            language: true,
-            variant: true,
-          },
-        }),
+        getVoices("CUSTOM", ctx.orgId),
+        getVoices("SYSTEM"),
       ]);
 
       return { custom, system };

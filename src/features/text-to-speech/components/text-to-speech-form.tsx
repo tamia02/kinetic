@@ -17,6 +17,10 @@ const ttsFormSchema = z.object({
   topP: z.number(),
   topK: z.number(),
   repetitionPenalty: z.number(),
+  provider: z.enum(["MODAL", "SARVAM"]).optional(),
+  model: z.string().optional(),
+  pace: z.number().optional(),
+  language: z.string().optional(),
 });
 
 export type TTSFormValues = z.infer<typeof ttsFormSchema>;
@@ -28,6 +32,8 @@ export const defaultTTSValues: TTSFormValues = {
   topP: 0.95,
   topK: 1000,
   repetitionPenalty: 1.2,
+  provider: "MODAL",
+  language: "en-US",
 };
 
 export const ttsFormOptions = formOptions({
@@ -44,7 +50,7 @@ export function TextToSpeechForm({
   const trpc = useTRPC();
   const router = useRouter();
   const createMutation = useMutation(
-    trpc.generations.create.mutationOptions({}),
+    (trpc.generations.create as any).mutationOptions({}),
   );
 
   const { checkout } = useCheckout();
@@ -64,10 +70,14 @@ export function TextToSpeechForm({
           topP: value.topP,
           topK: value.topK,
           repetitionPenalty: value.repetitionPenalty,
-        });
+          provider: value.provider,
+          model: value.model,
+          pace: value.pace,
+          language: value.language,
+        } as any);
 
         toast.success("Audio generated successfully!");
-        router.push(`/text-to-speech/${data.id}`);
+        router.push(`/text-to-speech/${(data as any).id}`);
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to generate audio";

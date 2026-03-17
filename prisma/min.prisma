@@ -1,0 +1,15 @@
+﻿datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+model Voice {
+  id       String   @id @default(cuid())
+  name     String
+  provider String   @default("MODAL")
+}

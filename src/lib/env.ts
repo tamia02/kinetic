@@ -17,6 +17,7 @@ export const env = createEnv({
     R2_BUCKET_NAME: z.string().min(1),
     CHATTERBOX_API_URL: z.url(),
     CHATTERBOX_API_KEY: z.string().min(1),
+    SARVAM_API_KEY: z.string().optional(),
     VAPI_SECRET: z.string().optional(),
     TWILIO_ACCOUNT_SID: z.string().optional(),
     TWILIO_AUTH_TOKEN: z.string().optional(),

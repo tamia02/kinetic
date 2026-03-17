@@ -7,7 +7,7 @@ async function testGenerate() {
   
   const body = {
     prompt: "Hello, this is a test generation.",
-    voice_key: "voices/system/cmmq4mmkm000jbs", // From previous check
+    voice_key: "voices/system/cmmq4mg60000gbs8z6uc6dcxn", // Updated from DB
     temperature: 0.8,
     top_p: 0.95,
     top_k: 1000,

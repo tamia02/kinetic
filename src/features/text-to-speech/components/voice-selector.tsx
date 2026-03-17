@@ -102,6 +102,9 @@ export function VoiceSelector() {
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">
                     {v.name} - {VOICE_CATEGORY_LABELS[v.category]}
+                    <span className="ml-2 text-xs opacity-50 uppercase">
+                      ({v.language || "en-US"}) {v.provider === "SARVAM" ? "✨ Sarvam" : ""}
+                    </span>
                   </span>
                 </SelectItem>
               ))}
@@ -118,6 +121,9 @@ export function VoiceSelector() {
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">
                     {v.name} - {VOICE_CATEGORY_LABELS[v.category]}
+                    <span className="ml-2 text-xs opacity-50 uppercase">
+                      ({v.language || "en-US"}) {v.provider === "SARVAM" ? "✨ Sarvam" : ""}
+                    </span>
                   </span>
                 </SelectItem>
               ))}

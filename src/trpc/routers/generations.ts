@@ -4,6 +4,7 @@ import { polar } from "@/lib/polar";
 import { env } from "@/lib/env";
 import { TRPCError } from "@trpc/server";
 import { chatterbox } from "@/lib/chatterbox-client";
+import { sarvam } from "@/lib/sarvam-client";
 import { prisma } from "@/lib/db";
 import { uploadAudio } from "@/lib/r2";
 import { TEXT_MAX_LENGTH } from "@/features/text-to-speech/data/constants";
@@ -13,13 +14,13 @@ export const generationsRouter = createTRPCRouter({
   getById: orgProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      const generation = await prisma.generation.findUnique({
-        where: { id: input.id, orgId: ctx.orgId },
-        omit: {
-          orgId: true,
-          r2ObjectKey: true,
-        },
-      });
+      const res = await ctx.db.query(
+        `SELECT id, text, "voiceName", "voiceId", temperature, "topP", "topK", "repetitionPenalty", provider, model, pace, language, "createdAt", "updatedAt"
+         FROM "Generation"
+         WHERE id = $1 AND "orgId" = $2`,
+        [input.id, ctx.orgId]
+      );
+      const generation = res.rows[0];
 
       if (!generation) {
         throw new TRPCError({ code: "NOT_FOUND" });
@@ -32,16 +33,15 @@ export const generationsRouter = createTRPCRouter({
     }),
   
   getAll: orgProcedure.query(async ({ ctx }) => {
-    const generations = await prisma.generation.findMany({
-      where: { orgId: ctx.orgId },
-      orderBy: { createdAt: "desc" },
-      omit: {
-        orgId: true,
-        r2ObjectKey: true,
-      },
-    });
+    const res = await ctx.db.query(
+      `SELECT id, text, "voiceName", "voiceId", temperature, "topP", "topK", "repetitionPenalty", provider, model, pace, language, "createdAt", "updatedAt"
+       FROM "Generation"
+       WHERE "orgId" = $1
+       ORDER BY "createdAt" DESC`,
+      [ctx.orgId]
+    );
 
-    return generations;
+    return res.rows;
   }),
 
   create: orgProcedure
@@ -49,6 +49,10 @@ export const generationsRouter = createTRPCRouter({
       z.object({
         text: z.string().min(1).max(TEXT_MAX_LENGTH),
         voiceId: z.string().min(1),
+        provider: z.enum(["MODAL", "SARVAM"]).default("MODAL"),
+        model: z.string().optional(),
+        pace: z.number().optional(),
+        language: z.string().optional(),
         temperature: z.number().min(0).max(2).default(0.8),
         topP: z.number().min(0).max(1).default(0.95),
         topK: z.number().min(1).max(10000).default(1000),
@@ -86,20 +90,13 @@ export const generationsRouter = createTRPCRouter({
         }
       }
 
-      const voice = await prisma.voice.findUnique({
-        where: {
-          id: input.voiceId,
-          OR: [
-            { variant: "SYSTEM" },
-            { variant: "CUSTOM", orgId: ctx.orgId, }
-          ],
-        },
-        select: {
-          id: true,
-          name: true,
-          r2ObjectKey: true,
-        },
-      });
+      const voiceRes = await ctx.db.query(
+        `SELECT id, name, language, "r2ObjectKey", provider, variant 
+         FROM "Voice" 
+         WHERE id = $1 AND ("orgId" = $2 OR variant = 'SYSTEM')`,
+        [input.voiceId, ctx.orgId]
+      );
+      const voice = voiceRes.rows[0];
 
       if (!voice) {
         throw new TRPCError({
@@ -108,60 +105,90 @@ export const generationsRouter = createTRPCRouter({
         });
       }
 
-      if (!voice.r2ObjectKey) {
+      const provider = input.provider || voice.provider || "MODAL";
+
+      if (voice.variant === "CUSTOM" && !voice.r2ObjectKey && provider === "MODAL") {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "Voice audio not available",
         });
       }
 
-      const { data, error } = await chatterbox.POST("/generate", {
-        body: {
-          prompt: input.text,
-          voice_key: voice.r2ObjectKey,
-          temperature: input.temperature,
-          top_p: input.topP,
-          top_k: input.topK,
-          repetition_penalty: input.repetitionPenalty,
-          norm_loudness: true,
-        },
-        parseAs: "arrayBuffer",
-      });
+      let audioData: ArrayBuffer;
 
-      if (error) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to generate audio",
+      if (provider === "SARVAM") {
+        try {
+          audioData = await sarvam.generate({
+            inputs: [input.text],
+            target_language_code: input.language || voice.language || "hi-IN",
+            speaker: voice.name,
+            model: "bulbul:v1",
+            speech_sample_rate: 22050,
+          });
+        } catch (err) {
+          console.error("Sarvam generation error:", err);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to generate audio via Sarvam AI",
+          });
+        }
+      } else {
+        const { data, error } = await chatterbox.POST("/generate", {
+          body: {
+            prompt: input.text,
+            voice_key: voice.r2ObjectKey!,
+            temperature: input.temperature,
+            top_p: input.topP,
+            top_k: input.topK,
+            repetition_penalty: input.repetitionPenalty,
+            norm_loudness: true,
+          },
+          parseAs: "arrayBuffer",
         });
+
+        if (error || !data) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to generate audio",
+          });
+        }
+        audioData = data as ArrayBuffer;
       }
 
-      if (!(data instanceof ArrayBuffer)) {
+      if (!(audioData instanceof ArrayBuffer)) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Invalid audio response",
         });
       }
 
-      const buffer = Buffer.from(data);
+      const buffer = Buffer.from(audioData);
       let generationId: string | null = null;
       let r2ObjectKey: string | null = null;
 
       try {
-        const generation = await prisma.generation.create({
-          data: {
-            orgId: ctx.orgId,
-            text: input.text,
-            voiceName: voice.name,
-            voiceId: voice.id,
-            temperature: input.temperature,
-            topP: input.topP,
-            topK: input.topK,
-            repetitionPenalty: input.repetitionPenalty,
-          },
-          select: {
-            id: true,
-          },
-        });
+        const createRes = await ctx.db.query(
+          `INSERT INTO "Generation" 
+           (id, "orgId", text, "voiceName", "voiceId", temperature, "topP", "topK", "repetitionPenalty", provider, model, pace, language, "createdAt", "updatedAt")
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+           RETURNING id`,
+          [
+            `gen_${Math.random().toString(36).substring(2, 11)}`,
+            ctx.orgId,
+            input.text,
+            voice.name,
+            voice.id,
+            input.temperature,
+            input.topP,
+            input.topK,
+            input.repetitionPenalty,
+            input.provider,
+            input.model || (provider === "SARVAM" ? "sarvam-tts-v1" : null),
+            input.pace || 1.0,
+            input.language || voice.language || (provider === "SARVAM" ? "hi-IN" : "en-US"),
+          ]
+        );
+        const generation = createRes.rows[0];
 
         generationId = generation.id;
         r2ObjectKey = `generations/orgs/${ctx.orgId}/${generation.id}`;
