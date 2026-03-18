@@ -38,7 +38,7 @@ export function AssistantCreateDialog() {
         <DialogHeader>
           <DialogTitle>Create Assistant</DialogTitle>
           <DialogDescription>
-            Configure your AI voice assistant's personality and voice.
+            Configure your AI voice assistant&apos;s personality and voice.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

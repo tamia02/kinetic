@@ -14,19 +14,19 @@ export type WebhookPayload = {
   timestamp: string;
   orgId: string;
   callSid?: string;
-  data: any;
+  data: unknown;
 };
 
 export type WebhookResponse = {
   action?: "continue" | "hangup" | "transfer";
-  modelOverride?: any;
+  modelOverride?: unknown;
   promptOverride?: string;
 };
 
 export async function emitWebhook(
   orgId: string, 
   event: WebhookEvent, 
-  data: any,
+  data: unknown,
   options: { blocking?: boolean; callSid?: string } = {}
 ): Promise<WebhookResponse | null> {
   const payload: WebhookPayload = {

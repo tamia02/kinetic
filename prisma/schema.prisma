@@ -5,10 +5,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
-enum Provider {
+enum AIProvider {
   MODAL
   SARVAM
 }
@@ -43,7 +42,7 @@ model Voice {
   category    VoiceCategory @default(GENERAL)
   language    String        @default("en-US")
   variant     VoiceVariant
-  provider    Provider      @default(MODAL)
+  provider    AIProvider      @default(MODAL)
   r2ObjectKey String?
 
   generations Generation[]
@@ -70,7 +69,7 @@ model Generation {
   topP              Float
   topK              Int
   repetitionPenalty Float
-  provider          Provider @default(MODAL)
+  provider          AIProvider @default(MODAL)
   model             String?  @default("sarvam-tts-v1")
   pace              Float?   @default(1.0)
   language          String?  @default("hi-IN-Swar")
