@@ -25,6 +25,7 @@ import { VoiceAvatar } from "@/components/voice-avatar/voice-avatar";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/trpc/routers/_app";
 import { VOICE_CATEGORY_LABELS } from "@/features/voices/data/voice-categories";
+import type { VoiceCategory } from "@/generated/prisma";
 import { useAudioPlayback } from "@/hooks/use-audio-playback";
 import { useTRPC } from "@/trpc/client";
 import { useState } from "react";
@@ -94,7 +95,7 @@ export function VoiceCard({ voice }: VoiceCardProps) {
           {voice.name}
           <span className="size-1 shrink-0 rounded-full bg-muted-foreground/50" />
           <span className="text-[#327c88]">
-            {VOICE_CATEGORY_LABELS[voice.category]}
+            {VOICE_CATEGORY_LABELS[voice.category as VoiceCategory]}
           </span>
         </div>
 

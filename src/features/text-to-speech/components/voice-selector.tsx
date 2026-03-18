@@ -5,6 +5,7 @@ import { useStore } from "@tanstack/react-form";
 import { 
   VOICE_CATEGORY_LABELS
 } from "@/features/voices/data/voice-categories";
+import type { VoiceCategory } from "@/generated/prisma";
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
@@ -85,7 +86,7 @@ export function VoiceSelector() {
                   <span className="truncate text-sm font-medium">
                     {currentVoice.name}
                     {currentVoice.category &&
-                      ` - ${VOICE_CATEGORY_LABELS[currentVoice.category]}`}
+                      ` - ${VOICE_CATEGORY_LABELS[currentVoice.category as VoiceCategory]}`}
                   </span>
                 </SelectItem>
               </SelectGroup>
@@ -101,7 +102,7 @@ export function VoiceSelector() {
                 <SelectItem key={v.id} value={v.id}>
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">
-                    {v.name} - {VOICE_CATEGORY_LABELS[v.category]}
+                    {v.name} - {VOICE_CATEGORY_LABELS[v.category as VoiceCategory]}
                     <span className="ml-2 text-xs opacity-50 uppercase">
                       ({v.language || "en-US"}) {v.provider === "SARVAM" ? "✨ Sarvam" : ""}
                     </span>
@@ -120,7 +121,7 @@ export function VoiceSelector() {
                 <SelectItem key={v.id} value={v.id}>
                   <VoiceAvatar seed={v.id} name={v.name} />
                   <span className="truncate text-sm font-medium">
-                    {v.name} - {VOICE_CATEGORY_LABELS[v.category]}
+                    {v.name} - {VOICE_CATEGORY_LABELS[v.category as VoiceCategory]}
                     <span className="ml-2 text-xs opacity-50 uppercase">
                       ({v.language || "en-US"}) {v.provider === "SARVAM" ? "✨ Sarvam" : ""}
                     </span>

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { prisma } from "@/lib/db";
 import { deleteAudio } from "@/lib/r2";
+import type { Voice } from "@/generated/prisma";
 import { createTRPCRouter, orgProcedure } from "../init";
 
 export const voicesRouter = createTRPCRouter({
@@ -46,7 +47,7 @@ export const voicesRouter = createTRPCRouter({
         if (input?.query) params.push(`%${input.query}%`);
 
         const res = await ctx.db.query(query, params);
-        return res.rows;
+        return res.rows as Voice[];
       };
 
       const [custom, system] = await Promise.all([
